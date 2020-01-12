@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title></title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="./rest-project.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.5.1/dist/leaflet.css" integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ==" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.5.1/dist/leaflet.js" integrity="sha512-GffPMF3RvMeYyc1LWMHtK8EbPv0iNZ8/oTtHPx9/cc2ILxQ+u905qIwdpULaqDkyBKgOaB57QTMg7ztg8Jm2Og==" crossorigin=""></script>
+<script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+	
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+    <script src="./scripts/classes.js"></script>
+    <script src="./scripts/global.js"></script>
+    <script src="./scripts/methods.js"></script>
+    <script src="./scripts/rest-client.js"></script>
+    <!-- TEMPLATE NOTIFICATION -->
+    <script id="notificationTemplate" type="text/html">
+        <!-- NOTIFICATION -->
+        <a class="dropdown-item dropdown-notification" href="{{href}}">
+            <div class="notification-read">
+                <i class="fa fa-times" aria-hidden="true"></i>
+            </div>
+            <div class="notifications-body">
+                <p class="notification-texte">{{texte}}</p>
+                <p class="notification-date text-muted">
+                    <i class="fa fa-clock-o" aria-hidden="true"></i> {{date}}
+                </p>
+            </div>
+        </a>
+    </script>
+
+
+</head>
+
+<body>
+    <div id="header">
+        <!-- <div onclick="addVehicle()" type="button" id="vhcBtn" class="btn btn-info btn-lg">Add new vehicle</div> -->
+        <div id="title">
+            <h1 id=""><b>CVRP solver</b></h1>
+        </div>
+
+    </div>
+
+    <aside id="search-panel">
+<label class="custom-file-upload">
+    <input type="file" id="file"/>
+</label>
+		<div onclick="sendFile()" type="button" id="mainBtn" class="btn btn-info btn-lg">Send File
+        </div>
+        <div onclick="showModal()" type="button" id="mainBtn" class="btn btn-info btn-lg">Add new point
+        </div>
+
+        <div class="modal fade" id="myModal" role="dialog">
+            <div class="modal-dialog">
+
+                <!-- Modal content-->
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title">Point</h4>
+                    </div>
+                    <div class="modal-body">
+
+                        <div class="labCont">
+                            <label for="weight">
+						<span> Weight: </span>
+						</label>
+                            <input type="text" name="weight" id="weight" required></br>
+
+                        </div>
+                        <div class="labCont">
+                            <label for="lat">
+						<span> Latitude: </span>
+						</label>
+                            <input type="text" name="lat" id="lat" required></br>
+
+                        </div>
+                        <div class="labCont">
+                            <label for="lng">
+						<span>Longitude:</span>
+						</label>
+                            <input type="text" name="lng" id="lng" required></br>
+
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-warning" data-dismiss="modal">Close</button>
+
+                        <button onclick="sendCreateDeliveryPackageRequest()" id="modal-submit-button" type="button" class="btn btn-default " data-dismiss="modal">Submit</button>
+                        <button onclick="sendDeleteDeliveryPackageRequest()" id="modal-delete-button" type="button" class="btn btn-danger hidden" data-dismiss="modal">Delete</button>
+                        <button onclick="sendUpdateDeliveryPackageRequest()" id="modal-update-button" type="button" class="btn btn-default hidden" data-dismiss="modal">Update</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <nav>
+            <ul id="package-list">
+            </ul>
+        </nav>
+    </aside>
+    <section id="package-panel">
+	<button class="button buttonPrev" onclick="previousFrame()">Previous</button>
+	<button class="button buttonNext" onclick="nextFrame()">Next</button>
+       <div id="mapid"></div>
+		<script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
+		<script src="./scripts/graphhopper.js"></script>
+		<link rel="stylesheet" href="./leaflet-routing-machine.css">
+		<script src="./scripts/Control.Geocoder.js"></script>
+
+
+    </section>
+    <aside id="vehicle-panel">
+
+		
+    <legend>Algorithm:</legend> 
+<label><input type="radio" name="algorithm" value="GREEDY" checked> Greedy algorithm</label>
+<label><input type="radio" name="algorithm" value="TABU">Tabu algorithm</label>
+	
+<legend>Number of cars:</legend> 
+<label><input type="number" id="cars" name="cars" min="1" value="1"></label>
+
+
+
+
+        <div onclick="Visualize()" type="button" id="vhcBtn" class="btn btn-info btn-lg">Visualize
+        </div>
+      
+        <nav>
+            <ul id="job-list">
+            </ul>
+        </nav>
+
+
+    </aside>
+</body>
+
+</html>
+		
+
