@@ -195,7 +195,7 @@ async function sendCreateJobRequest(e) {
     var vehicleCapacities = Array.from({ length: Number(document.getElementById("cars").value) }, (v, k) => 10);
     var points = Object.values(visibleDeliveryPackages);
     var depot = new DeliveryPackage(0, 52.2, 21, "depot");
-    var algorithm = "GREEDY";
+    var algorithm = document.getElementsByName("algorithm")[0].value;
     var createJobRequest = new CreateJobRequest(points, algorithm, depot, vehicleCapacities);
     response = await createJob(createJobRequest);
     console.log(response);
@@ -260,7 +260,6 @@ function mapCurrentVehicleRoutesToPoints(currentVehicleRoutes) {
 }
 
 function drawPathsBasedOnVehicleRoutes(vehicleRoutes) {
-    console.log("dupa");
     for (var k = 0; k < vehicleRoutes.length; k++) {
         var vehicleRoute = vehicleRoutes[k];
         var color = colormap[k % 11];
