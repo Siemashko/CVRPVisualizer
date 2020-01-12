@@ -54,6 +54,12 @@ public class ProcessorService {
             }
         } catch(UnsolvableJobException ex) {
             job.setStatus(Job.JobStatus.ERROR);
+            job.setJobResult(ex.getMessage());
+            jobRepository.saveAndFlush(job);
+            return;
+        } catch(Exception ex) {
+            job.setStatus(Job.JobStatus.ERROR);
+            job.setJobResult(ex.getMessage());
             jobRepository.saveAndFlush(job);
             return;
         }

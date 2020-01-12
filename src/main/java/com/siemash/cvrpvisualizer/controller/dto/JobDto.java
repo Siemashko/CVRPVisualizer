@@ -16,6 +16,7 @@ public class JobDto {
     private Long id;
     private String algorithm;
     private String jobStatus;
+    private List<Double> vehicleCapacities;
     private List<PointDto> points;
     private PointDto depot;
     private String jobResult;
@@ -25,6 +26,7 @@ public class JobDto {
                 source.getId(),
                 source.getAlgorithm().toString(),
                 source.getStatus().toString(),
+                source.getVehicleCapacities(),
                 source.getPoints().stream().map(PointDto::from).collect(Collectors.toList()),
                 PointDto.from(source.getDepot()),
                 source.getJobResult()
