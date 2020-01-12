@@ -103,9 +103,7 @@ function showModal() {
 }
 
 function Visualize() {
-    if (!ValidateCars()) {
-        return 0
-    }
+
     drawPath(52.2861, 21.0476, 52.1848, 20.9546);
     drawPath(52.2587, 20.6984, 52.2612, 21);
     drawPath(52.2587, 20.6984, 52.1848, 20.9546);
@@ -126,6 +124,7 @@ function drawPath(lat1, lng1, lat2, lng2, color) {
         },
         geocoder: L.Control.Geocoder.nominatim(),
         routeWhileDragging: false,
+        fitSelectedRoutes: false,
         lineOptions: {
             styles: [{
                 color: color,
@@ -188,6 +187,9 @@ function showModalFromMarker(e) {
 }
 
 async function sendCreateJobRequest(e) {
+    if (!ValidateCars()) {
+        return 0
+    }
     var vehicleCapacities = Array.from({ length: Number(document.getElementById("cars").value) }, (v, k) => 10);
     var points = Object.values(visibleDeliveryPackages);
     var depot = new DeliveryPackage(0, 52.2, 21, "depot");
