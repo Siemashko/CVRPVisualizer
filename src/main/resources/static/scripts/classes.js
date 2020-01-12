@@ -1,24 +1,17 @@
 class DeliveryPackage {
-    constructor(deliveryPackageId, tags, width, length, height, weight, lat, lng, createdTime, lastModifiedTime, version) {
-        this.deliveryPackageId = deliveryPackageId;
-        this.tags = tags;
-        this.width = width;
-        this.length = length;
-        this.height = height;
+    constructor(weight, lat, lng) {
         this.weight = weight;
-        this.lat = lat;
-        this.lng = lng;
-        this.createdTime = createdTime;
-        this.lastModifiedTime = lastModifiedTime;
-        this.version = version;
+        this.latitude = lat;
+        this.longitude = lng;
     }
 }
 
-class CreatePackageRequest {
-    constructor(weight, lat, lng) {
-        this.weight = weight;
-        this.lat = lat;
-        this.lng = lng;
+class CreateJobRequest {
+    constructor(algorithm, points, depot, vehicleCapacities) {
+        this.points = points;
+        this.algorithm = algorithm;
+        this.depot = depot;
+        this.vehicleCapacities = vehicleCapacities;
     }
 }
 
@@ -33,16 +26,13 @@ class UpdatePackageRequest {
 }
 
 class Job {
-    constructor(jobId, status, vehicleCapacity, jobResult) {
-        this.jobId = jobId;
-        this.status = status;
-        this.vehicleCapacity = vehicleCapacity;
+    constructor(id, algorithm, jobStatus, vehicleCapacities, points, depot, jobResult) {
+        this.id = id
+        this.algorithm = algorithm;
+        this.jobStatus = jobStatus;
+        this.vehicleCapacities = vehicleCapacities;
+        this.points = points;
+        this.depot = depot;
         this.jobResult = jobResult;
-    }
-}
-
-class CreateJobRequest {
-    constructor(vehicleCapacity) {
-        this.vehicleCapacity = vehicleCapacity;
     }
 }

@@ -43,13 +43,11 @@ public class ProcessorService {
                 .collect(Collectors.toList());
 
         final DistanceMatrix distanceMatrix = distanceService.convertPointsToDistanceMatrix(pointsForDistanceMatrix);
-
         final GreedySolver solver = new GreedySolver(vehicleCapacities, points, startingPoint, distanceMatrix);
         final List<String> solverStates = new ArrayList<>();
         try {
             while (!solver.isSolved()) {
                 solver.nextStep();
-                log.info("{}", solver);
                 solverStates.add(solver.toString());
             }
         } catch(UnsolvableJobException ex) {

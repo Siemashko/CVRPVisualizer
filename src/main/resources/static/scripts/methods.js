@@ -1,6 +1,4 @@
 async function initializeApplication() {
-    var count = 6;
-    var lastCount = 0;
     if (!mymap) {
         mymap = L.map('mapid').setView([52.23, 21], 12);
         markerLayerGroup = L.layerGroup().addTo(mymap);
@@ -14,13 +12,14 @@ async function initializeApplication() {
             id: 'mapbox.streets'
         }).addTo(mymap);
         mymap.on('click', onMapClick);
-	}
+    }
     markerLayerGroup.clearLayers();
     polygonLayerGroup.clearLayers();
     document.getElementById("package-list").innerHTML = "";
     document.getElementById("job-list").innerHTML = "";
-    var listOfDeliveryPackages = await findAll();
-    listOfDeliveryPackages.forEach(package => addPackageToList(package));
+    // var listOfDeliveryPackages = await findAll();
+    // listOfDeliveryPackages.forEach(package => addPackageToList(package));
+    visibleDeliveryPackages.values.forEach(package => addPackageToList(package));
     var listOfJobs = await findAllJobs();
     listOfJobs.forEach(job => addJobToList(job));
     var greenIcon = new L.Icon({
@@ -31,7 +30,7 @@ async function initializeApplication() {
         popupAnchor: [1, -34],
         shadowSize: [82 * 0.707, 82 * 0.707]
     });
-	var redIcon = new L.Icon({
+    var redIcon = new L.Icon({
         iconUrl: 'https://cdn.rawgit.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
         shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
         iconSize: [50 * 0.707, 82 * 0.707],
@@ -56,26 +55,24 @@ function addJobToList(job) {
     // marker.on('click', showModalFromMarker);
 }
 
-async function drawRoute(e) {
-    var jobId = Number(e.target.id.replace("job-", ""));
-    var job = await findJobById(jobId);
-    var route = [
-        [52.2, 21]
-    ];
-
-    var polygon = L.polygon(route.concat([...job.jobResult.jobResultEntries.map(entry => [entry.lat, entry.lng])]), { fillOpacity: 0 }).addTo(polygonLayerGroup);
-}
-
 function addPackageToList(package) {
     var packageList = document.getElementById("package-list");
     var listElement = document.createElement("li");
     listElement.id = "package-" + package.deliveryPackageId;
-    listElement.innerHTML = "Delivery Package: " + package.deliveryPackageId;
+    listElement.innerHTML = "lat: " + package.latitude + " lng: " + package.longitude + " weight: " + package.weight;
     listElement.addEventListener("click", showModalFromPackage);
     packageList.append(listElement);
-    var marker = L.marker([package.lat, package.lng]).addTo(markerLayerGroup);
+    var marker = L.marker([package.latitude, package.longitude]).addTo(markerLayerGroup);
     marker.id = "marker-" + package.deliveryPackageId;
     marker.on('click', showModalFromMarker);
+}
+
+function setActiveJob(job) {
+    activeJob = job;
+    visibleDeliveryPackages = job.points.reduce(function(map, obj) {
+        map[obj.uniqueIdentifier] = obj;
+        return map;
+    }, {});
 }
 
 function showModal() {
@@ -92,45 +89,44 @@ function showModal() {
 }
 
 function Visualize() {
-	if (!ValidateCars()) {
-		return 0
-	}	
-		drawPath(52.2861, 21.0476, 52.1848, 20.9546);
-		drawPath(52.2587, 20.6984, 52.2612, 21);
-		drawPath(52.2587, 20.6984, 52.1848, 20.9546);
+    if (!ValidateCars()) {
+        return 0
+    }
+    drawPath(52.2861, 21.0476, 52.1848, 20.9546);
+    drawPath(52.2587, 20.6984, 52.2612, 21);
+    drawPath(52.2587, 20.6984, 52.1848, 20.9546);
 
-    
+
 }
 
 function drawPath(lat1, lng1, lat2, lng2) {
 
-  var routingControl = L.Routing.control({
-	waypoints: [
-		L.latLng(lat1, lng1),
-		L.latLng(lat2, lng2)
-	],
-	router: L.Routing.graphHopper('cb77ede8-3517-4c8c-a7a7-c40124f4009b'),
-		createMarker: function(i, waypoint, n) {
+    var routingControl = L.Routing.control({
+        waypoints: [
+            L.latLng(lat1, lng1),
+            L.latLng(lat2, lng2)
+        ],
+        router: L.Routing.graphHopper('cb77ede8-3517-4c8c-a7a7-c40124f4009b'),
+        createMarker: function(i, waypoint, n) {
             return null;
-          },
-		geocoder: L.Control.Geocoder.nominatim(),
-	routeWhileDragging: false,
-    lineOptions: {
-    styles: [{ color: 'blue', opacity: 1, weight: 5 }]
-          }
-        }).addTo(mymap);
-		routingControl.hide();
+        },
+        geocoder: L.Control.Geocoder.nominatim(),
+        routeWhileDragging: false,
+        lineOptions: {
+            styles: [{ color: 'blue', opacity: 1, weight: 5 }]
+        }
+    }).addTo(mymap);
+    routingControl.hide();
 }
 
 function ValidateCars() {
-    var cars = document.getElementsByName("cars")[0].value;  
-    if( /^\d+$/.test(cars)) 
-	{
-		return true;
-	} else {  
-        alert("Number of cars has to be positive integer");  
-        return false;  
-    }  
+    var cars = document.getElementsByName("cars")[0].value;
+    if (/^\d+$/.test(cars)) {
+        return true;
+    } else {
+        alert("Number of cars has to be positive integer");
+        return false;
+    }
 }
 
 function showVehicleModal() {
@@ -188,6 +184,7 @@ async function sendCreateDeliveryPackageRequest(e) {
     var weight = Number(document.getElementById("weight").value);
     var lat = Number(document.getElementById("lat").value);
     var lng = Number(document.getElementById("lng").value);
+    var uniqueIdentifier = Math.random().toString(36).slice(2);
 
     var createPackageRequest = new CreatePackageRequest(weight, lat, lng);
 
@@ -226,6 +223,6 @@ function onMapClick(e) {
 document.addEventListener("DOMContentLoaded", initializeApplication)
 
 function sendFile() {
- var path = document.getElementById("file").value
- console.log(path)
+    var path = document.getElementById("file").value
+    console.log(path)
 }

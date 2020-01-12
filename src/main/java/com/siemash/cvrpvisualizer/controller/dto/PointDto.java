@@ -12,8 +12,9 @@ public class PointDto {
     private Double latitude;
     private Double longitude;
     private Double weight;
+    private String uniqueIdentifier;
 
     public static PointDto from(Point source) {
-        return new PointDto(source.getLatitude(), source.getLongitude(), source.getWeight());
+        return new PointDto(source.getLatitude(), source.getLongitude(), source.getWeight(), source.getUniqueIdentifier());
     }
 }

@@ -24,8 +24,8 @@ public class DistanceService {
 
     @PostConstruct
     public void testGraphHopper() {
-        final Point point1 = new Point(1L,52.269838, 20.853006, 0.0);
-        final Point point2 = new Point(2L, 52.251346, 21.157876, 0.0);
+        final Point point1 = new Point(1L,52.269838, 20.853006, 0.0, "a");
+        final Point point2 = new Point(2L, 52.251346, 21.157876, 0.0, "b");
         final GraphHopperRouteResponse response = graphHopperRestClient.findRoute(List.of(point1.toGHRequestFormat(), point2.toGHRequestFormat()));
         log.info("{}", response);
     }

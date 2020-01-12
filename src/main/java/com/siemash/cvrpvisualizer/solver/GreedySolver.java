@@ -49,6 +49,7 @@ public class GreedySolver extends Solver {
                     .get();
 
             super.vehicleLoads.set(this.currentVehicleIndex,super.vehicleLoads.get(this.currentVehicleIndex) + closestPoint.getWeight());
+            super.vehicleRoutes.get(this.currentVehicleIndex).add(closestPoint);
             super.currentVehiclePosition.set(this.currentVehicleIndex, closestPoint);
             super.isPointAssignedMap.put(closestPoint, true);
 
@@ -60,10 +61,10 @@ public class GreedySolver extends Solver {
 
     @Override
     public String toString() {
-        return "{\"currentVehicleIndex\"=" + this.currentVehicleIndex + "," +
-                "\"currentVehicleRoutes\"=" + super.vehicleRoutes + "," +
-                "\"currentVehicleLoads\"=" + super.vehicleLoads + "," +
-                "\"pointsLeft\"=" + super.isPointAssignedMap.values().stream().filter(value -> !value).count() + "}";
+        return "{\"currentVehicleIndex\":" + this.currentVehicleIndex + "," +
+                "\"currentVehicleRoutes\":" + super.vehicleRoutes + "," +
+                "\"currentVehicleLoads\":" + super.vehicleLoads + "," +
+                "\"pointsLeft\":" + super.isPointAssignedMap.values().stream().filter(value -> !value).count() + "}";
     }
 
 
