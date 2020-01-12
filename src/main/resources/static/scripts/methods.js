@@ -31,6 +31,14 @@ async function initializeApplication() {
         popupAnchor: [1, -34],
         shadowSize: [82 * 0.707, 82 * 0.707]
     });
+	var redIcon = new L.Icon({
+        iconUrl: 'https://cdn.rawgit.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+        iconSize: [50 * 0.707, 82 * 0.707],
+        iconAnchor: [25 * 0.707, 82 * 0.707],
+        popupAnchor: [1, -34],
+        shadowSize: [82 * 0.707, 82 * 0.707]
+    });
     L.marker([52.2, 21], { icon: greenIcon }).addTo(markerLayerGroup);
 
 }
@@ -87,14 +95,14 @@ function Visualize() {
 	if (!ValidateCars()) {
 		return 0
 	}	
-		drawPath(52.2861, 21.0476, 52.1848, 20.9546, false, false);
-		drawPath(52.2587, 20.6984, 52.2612, 21, true, false);
-		drawPath(52.2587, 20.6984, 52.1848, 20.9546, true, false);
+		drawPath(52.2861, 21.0476, 52.1848, 20.9546);
+		drawPath(52.2587, 20.6984, 52.2612, 21);
+		drawPath(52.2587, 20.6984, 52.1848, 20.9546);
 
     
 }
 
-function drawPath(lat1, lng1, lat2, lng2, is1base, is2base) {
+function drawPath(lat1, lng1, lat2, lng2) {
 
   var routingControl = L.Routing.control({
 	waypoints: [
@@ -103,36 +111,6 @@ function drawPath(lat1, lng1, lat2, lng2, is1base, is2base) {
 	],
 	router: L.Routing.graphHopper('cb77ede8-3517-4c8c-a7a7-c40124f4009b'),
 		createMarker: function(i, waypoint, n) {
-			if(is1base && i == 0) {
-				icon = 'https://cdn.rawgit.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png';
-				shadow = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png';
-			} else if (is2base && i == 1) {
-			    icon = 'https://cdn.rawgit.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png';
-				shadow = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png';
-			} else {
-			    icon = 'https://cdn.rawgit.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png';
-				shadow = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png';
-			}
-            const marker = L.marker(waypoint.latLng, {
-              draggable: true,
-              bounceOnAdd: false,
-              bounceOnAddOptions: {
-                duration: 1000,
-                height: 800,
-                function() {
-                  (bindPopup(myPopup).openOn(map))
-                }
-              },
-              icon: L.icon({
-                iconUrl: icon,
-				iconSize: [50 * 0.707, 82 * 0.707],
-				iconAnchor: [25 * 0.707, 82 * 0.707],
-				popupAnchor: [1, -34],
-				shadowSize: [82 * 0.707, 82 * 0.707],
-				shadowUrl: shadow,
-                shadowSize: [68, 95],
-              })
-            });
             return null;
           },
 		geocoder: L.Control.Geocoder.nominatim(),
