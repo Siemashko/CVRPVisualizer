@@ -41,11 +41,11 @@ public class ProcessorService {
         final List<Double> vehicleCapacities = job.getVehicleCapacities();
         final List<Point> pointsForDistanceMatrix = Stream.concat(Stream.of(startingPoint), points.stream())
                 .collect(Collectors.toList());
-
-        final DistanceMatrix distanceMatrix = distanceService.convertPointsToDistanceMatrix(pointsForDistanceMatrix);
-        final GreedySolver solver = new GreedySolver(vehicleCapacities, points, startingPoint, distanceMatrix);
         final List<String> solverStates = new ArrayList<>();
+
         try {
+            final DistanceMatrix distanceMatrix = distanceService.convertPointsToDistanceMatrix(pointsForDistanceMatrix);
+            final GreedySolver solver = new GreedySolver(vehicleCapacities, points, startingPoint, distanceMatrix);
             while (!solver.isSolved()) {
                 solver.nextStep();
                 solverStates.add(solver.toString());

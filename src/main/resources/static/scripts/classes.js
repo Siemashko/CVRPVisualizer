@@ -1,13 +1,14 @@
 class DeliveryPackage {
-    constructor(weight, lat, lng) {
+    constructor(weight, lat, lng, uniqueIdentifier) {
         this.weight = weight;
         this.latitude = lat;
         this.longitude = lng;
+        this.uniqueIdentifier = uniqueIdentifier;
     }
 }
 
 class CreateJobRequest {
-    constructor(algorithm, points, depot, vehicleCapacities) {
+    constructor(points, algorithm, depot, vehicleCapacities) {
         this.points = points;
         this.algorithm = algorithm;
         this.depot = depot;

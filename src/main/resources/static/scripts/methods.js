@@ -19,9 +19,16 @@ async function initializeApplication() {
     document.getElementById("job-list").innerHTML = "";
     // var listOfDeliveryPackages = await findAll();
     // listOfDeliveryPackages.forEach(package => addPackageToList(package));
-    visibleDeliveryPackages.values.forEach(package => addPackageToList(package));
-    var listOfJobs = await findAllJobs();
-    listOfJobs.forEach(job => addJobToList(job));
+    Object.keys(visibleDeliveryPackages).forEach(packageIdentifier => addPackageToList(visibleDeliveryPackages[packageIdentifier]));
+    var jobList = await findAllJobs();
+    visibleJobs = jobList.reduce(function(map, obj) {
+        map[obj.id] = obj;
+        return map;
+    }, {});
+    Object.keys(visibleJobs).forEach(jobId => addJobToList(visibleJobs[jobId]));
+    if (activeJob && activeJob.jobStatus === "DONE") {
+        drawPathsBasedOnVehicleRoutes(mapCurrentVehicleRoutesToPoints(JSON.parse(activeJob.jobResult)[currentFrame].currentVehicleRoutes));
+    }
     var greenIcon = new L.Icon({
         iconUrl: 'https://cdn.rawgit.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
         shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
@@ -46,9 +53,9 @@ async function initializeApplication() {
 function addJobToList(job) {
     var jobList = document.getElementById("job-list");
     var listElement = document.createElement("li");
-    listElement.id = "job-" + job.jobId;
-    listElement.innerHTML = "Vehicle job: " + job.jobId + "<br/>Status: " + job.status;
-    listElement.addEventListener("click", drawRoute);
+    listElement.id = "job-" + job.id;
+    listElement.innerHTML = "Vehicle job: " + job.id + "<br/>Status: " + job.jobStatus;
+    listElement.addEventListener("click", setActiveJob);
     jobList.append(listElement);
     // var marker = L.marker([package.lat, package.lng]).addTo(markerLayerGroup);
     // marker.id = "marker-" + package.deliveryPackageId;
@@ -58,21 +65,28 @@ function addJobToList(job) {
 function addPackageToList(package) {
     var packageList = document.getElementById("package-list");
     var listElement = document.createElement("li");
-    listElement.id = "package-" + package.deliveryPackageId;
+    listElement.id = "package-" + package.uniqueIdentifier;
     listElement.innerHTML = "lat: " + package.latitude + " lng: " + package.longitude + " weight: " + package.weight;
     listElement.addEventListener("click", showModalFromPackage);
     packageList.append(listElement);
     var marker = L.marker([package.latitude, package.longitude]).addTo(markerLayerGroup);
-    marker.id = "marker-" + package.deliveryPackageId;
+    marker.id = "marker-" + package.uniqueIdentifier;
     marker.on('click', showModalFromMarker);
 }
 
-function setActiveJob(job) {
-    activeJob = job;
-    visibleDeliveryPackages = job.points.reduce(function(map, obj) {
+function setActiveJob(e) {
+    currentFrame = 0;
+    activeJob = visibleJobs[e.target.id.replace("job-", "")];
+    visibleDeliveryPackages = activeJob.points.reduce(function(map, obj) {
         map[obj.uniqueIdentifier] = obj;
         return map;
     }, {});
+    initializeApplication();
+}
+
+function nextFrame() {
+    currentFrame++;
+    initializeApplication();
 }
 
 function showModal() {
@@ -99,7 +113,7 @@ function Visualize() {
 
 }
 
-function drawPath(lat1, lng1, lat2, lng2) {
+function drawPath(lat1, lng1, lat2, lng2, color) {
 
     var routingControl = L.Routing.control({
         waypoints: [
@@ -113,7 +127,11 @@ function drawPath(lat1, lng1, lat2, lng2) {
         geocoder: L.Control.Geocoder.nominatim(),
         routeWhileDragging: false,
         lineOptions: {
-            styles: [{ color: 'blue', opacity: 1, weight: 5 }]
+            styles: [{
+                color: color,
+                opacity: 1,
+                weight: 5
+            }]
         }
     }).addTo(mymap);
     routingControl.hide();
@@ -134,15 +152,14 @@ function showVehicleModal() {
     $("#myModal2").modal("show");
 }
 
-async function showModalFromPackage(e) {
+function showModalFromPackage(e) {
     packageId = Number(e.target.id.replace("package-", ""));
     activeModaleDeliveryPackageId = packageId;
-    deliveryPackages = await findByIds([packageId]);
-    deliveryPackage = deliveryPackages[0];
+    var deliveryPackage = visibleDeliveryPackages[packageId];
 
     document.getElementById("weight").value = deliveryPackage.weight;
-    document.getElementById("lat").value = deliveryPackage.lat;
-    document.getElementById("lng").value = deliveryPackage.lng;
+    document.getElementById("lat").value = deliveryPackage.latitude;
+    document.getElementById("lng").value = deliveryPackage.longitude;
 
     document.getElementById("modal-update-button").classList.remove("hidden");
     document.getElementById("modal-delete-button").classList.remove("hidden");
@@ -152,16 +169,15 @@ async function showModalFromPackage(e) {
 
 }
 
-async function showModalFromMarker(e) {
+function showModalFromMarker(e) {
+    console.log(e.target.id);
     packageId = Number(e.target.id.replace("marker-", ""));
     activeModaleDeliveryPackageId = packageId;
-
-    deliveryPackages = await findByIds([packageId]);
-    deliveryPackage = deliveryPackages[0];
+    var deliveryPackage = visibleDeliveryPackages[packageId];
 
     document.getElementById("weight").value = deliveryPackage.weight;
-    document.getElementById("lat").value = deliveryPackage.lat;
-    document.getElementById("lng").value = deliveryPackage.lng;
+    document.getElementById("lat").value = deliveryPackage.latitude;
+    document.getElementById("lng").value = deliveryPackage.longitude;
 
     document.getElementById("modal-update-button").classList.remove("hidden");
     document.getElementById("modal-delete-button").classList.remove("hidden");
@@ -172,44 +188,42 @@ async function showModalFromMarker(e) {
 }
 
 async function sendCreateJobRequest(e) {
-    var capacity = Number(document.getElementById("capacity").value);
-
-    var createJobRequest = new CreateJobRequest(capacity);
-    await createJob(createJobRequest);
-
+    var vehicleCapacities = Array.from({ length: Number(document.getElementById("cars").value) }, (v, k) => 10);
+    var points = Object.values(visibleDeliveryPackages);
+    var depot = new DeliveryPackage(0, 52.2, 21, "depot");
+    var algorithm = "GREEDY";
+    var createJobRequest = new CreateJobRequest(points, algorithm, depot, vehicleCapacities);
+    response = await createJob(createJobRequest);
+    console.log(response);
     initializeApplication();
 }
 
-async function sendCreateDeliveryPackageRequest(e) {
+function sendCreateDeliveryPackageRequest(e) {
     var weight = Number(document.getElementById("weight").value);
     var lat = Number(document.getElementById("lat").value);
     var lng = Number(document.getElementById("lng").value);
     var uniqueIdentifier = Math.random().toString(36).slice(2);
 
-    var createPackageRequest = new CreatePackageRequest(weight, lat, lng);
-
-    await createPackage(createPackageRequest);
-
+    visibleDeliveryPackages[uniqueIdentifier] = new DeliveryPackage(weight, lat, lng, uniqueIdentifier);
     initializeApplication();
 }
 
-async function sendUpdateDeliveryPackageRequest(e) {
+function sendUpdateDeliveryPackageRequest(e) {
     var weight = Number(document.getElementById("weight").value);
     var lat = Number(document.getElementById("lat").value);
     var lng = Number(document.getElementById("lng").value);
 
-    deliveryPackages = await findByIds([activeModaleDeliveryPackageId]);
-    deliveryPackage = deliveryPackages[0];
-
-    var updatePackageRequest = new UpdatePackageRequest(activeModaleDeliveryPackageId, weight, lat, lng, deliveryPackage.version);
-
-    await updatePackage(updatePackageRequest);
+    var deliveryPackage = visibleDeliveryPackages[activeModaleDeliveryPackageId];
+    deliveryPackage.weight = weight;
+    deliveryPackage.latitude = lat;
+    deliveryPackage.longitude = lng;
+    visibleDeliveryPackages[activeModaleDeliveryPackageId] = deliveryPackage;
 
     initializeApplication();
 }
 
-async function sendDeleteDeliveryPackageRequest(e) {
-    await deletePackage(activeModaleDeliveryPackageId);
+function sendDeleteDeliveryPackageRequest(e) {
+    delete visibleDeliveryPackages[activeModaleDeliveryPackageId];
 
     initializeApplication();
 }
@@ -224,5 +238,30 @@ document.addEventListener("DOMContentLoaded", initializeApplication)
 
 function sendFile() {
     var path = document.getElementById("file").value
-    console.log(path)
+    var script = document.createElement("script");
+    script.src = path;
+    $("head").append(script);
+    // var data = $.getJSON(path, function(obj) {});
+    console.log(newValues);
+}
+
+function mapCurrentVehicleRoutesToPoints(currentVehicleRoutes) {
+    return currentVehicleRoutes.map(currentVehicleRoute => currentVehicleRoute.map(ui => {
+        if (ui === "depot") {
+            return new DeliveryPackage(0, 52.2, 21, "depot");
+        } else {
+            return visibleDeliveryPackages[ui];
+        }
+    }));
+}
+
+function drawPathsBasedOnVehicleRoutes(vehicleRoutes) {
+    console.log("dupa");
+    for (var k = 0; k < vehicleRoutes.length; k++) {
+        var vehicleRoute = vehicleRoutes[k];
+        var color = colormap[k % 11];
+        for (var i = 0; i + 1 < vehicleRoute.length; i++) {
+            drawPath(vehicleRoute[i].latitude, vehicleRoute[i].longitude, vehicleRoute[i + 1].latitude, vehicleRoute[i + 1].longitude, color);
+        }
+    }
 }
