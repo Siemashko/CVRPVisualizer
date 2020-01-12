@@ -125,6 +125,8 @@ function drawPath(lat1, lng1, lat2, lng2, color) {
         geocoder: L.Control.Geocoder.nominatim(),
         routeWhileDragging: false,
         fitSelectedRoutes: false,
+        draggableWaypoints: false,
+	    addWaypoints: false,
         lineOptions: {
             styles: [{
                 color: color,
