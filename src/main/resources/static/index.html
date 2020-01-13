@@ -11,6 +11,7 @@
     <script src="https://unpkg.com/leaflet@1.5.1/dist/leaflet.js" integrity="sha512-GffPMF3RvMeYyc1LWMHtK8EbPv0iNZ8/oTtHPx9/cc2ILxQ+u905qIwdpULaqDkyBKgOaB57QTMg7ztg8Jm2Og==" crossorigin=""></script>
     <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
     <script src="./scripts/classes.js"></script>
@@ -47,9 +48,10 @@
 
     <aside id="search-panel">
         <label class="custom-file-upload">
-    <input type="file" id="file"/>
+    <input type="file" id="fileinput"/>
+    <!-- <input type='button' id='fileBtn' value='Load File' onclick='loadFile();'> -->
 </label>
-        <div onclick="sendFile()" type="button" id="mainBtn" class="btn btn-info btn-lg">Send File
+        <div onclick="loadFile()" type="button" id="mainBtn" class="btn btn-info btn-lg">Load File
         </div>
         <div onclick="showModal()" type="button" id="mainBtn" class="btn btn-info btn-lg">Add new point
         </div>
@@ -104,6 +106,8 @@
         </nav>
     </aside>
     <section id="package-panel">
+        <button class="button buttonPrev" onclick="runVisualization()">Animate</button>
+        <button class="button buttonNext" onclick="nextFrame()">Next</button>
         <div id="mapid"></div>
         <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
         <script src="./scripts/graphhopper.js"></script>
@@ -116,9 +120,9 @@
 
 
         <legend>Algorithm:</legend>
-        <label><input type="radio" name="algorithm" checked> algorithm 1</label>
-        <label><input type="radio" name="algorithm"> algorithm 2</label>
-        <label><input type="radio" name="algorithm"> algorithm 3</label>
+        <label><input type="radio" name="algorithm" value="GREEDY" checked> Greedy algorithm</label>
+        <label><input type="radio" name="algorithm" value="TABU">Tabu algorithm</label>
+
         <legend>Number of cars:</legend>
         <label><input type="number" id="cars" name="cars" min="1" value="1"></label>
 

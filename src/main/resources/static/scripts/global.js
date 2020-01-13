@@ -6,7 +6,10 @@ var visibleDeliveryPackages = {};
 var visibleJobs = {};
 var markerLayerGroup;
 var polygonLayerGroup;
+var pathLayerGroup;
+var animationInterval;
 var currentFrame = 0;
+var routingControls = [];
 var colormap = {
     0: "#C20088",
     1: "#426600",

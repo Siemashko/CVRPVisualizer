@@ -3,6 +3,7 @@ async function initializeApplication() {
         mymap = L.map('mapid').setView([52.23, 21], 12);
         markerLayerGroup = L.layerGroup().addTo(mymap);
         polygonLayerGroup = L.layerGroup().addTo(mymap);
+        pathLayerGroup = L.layerGroup().addTo(mymap);
 
         L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
             maxZoom: 18,
@@ -15,6 +16,8 @@ async function initializeApplication() {
     }
     markerLayerGroup.clearLayers();
     polygonLayerGroup.clearLayers();
+    pathLayerGroup.clearLayers();
+
     document.getElementById("package-list").innerHTML = "";
     document.getElementById("job-list").innerHTML = "";
     // var listOfDeliveryPackages = await findAll();
@@ -68,7 +71,13 @@ function addPackageToList(package) {
 
 function setActiveJob(e) {
     currentFrame = 0;
+    clearInterval(animationInterval);
     activeJob = visibleJobs[e.target.id.replace("job-", "")];
+    if (activeJob.jobStatus === "ERROR") {
+        alert("Job finished with exception: \n" + activeJob.jobResult);
+    }
+    routingControls.forEach(routingControl => mymap.removeControl(routingControl));
+    routingControls = [];
     visibleDeliveryPackages = activeJob.points.reduce(function(map, obj) {
         map[obj.uniqueIdentifier] = obj;
         return map;
@@ -77,13 +86,14 @@ function setActiveJob(e) {
 }
 
 function nextFrame() {
-    currentFrame++;
-    initializeApplication();
+    if (currentFrame < JSON.parse(activeJob.jobResult).length - 1) {
+        currentFrame++;
+        initializeApplication();
+    }
 }
 
-function previousFrame() {
-    currentFrame--;
-    initializeApplication();
+function runVisualization() {
+    animationInterval = setInterval(nextFrame, 1000);
 }
 
 function showModal() {
@@ -123,7 +133,7 @@ function drawPath(lat1, lng1, lat2, lng2, color) {
         routeWhileDragging: false,
         fitSelectedRoutes: false,
         draggableWaypoints: false,
-	    addWaypoints: false,
+        addWaypoints: false,
         lineOptions: {
             styles: [{
                 color: color,
@@ -133,6 +143,7 @@ function drawPath(lat1, lng1, lat2, lng2, color) {
         }
     }).addTo(mymap);
     routingControl.hide();
+    routingControls.push(routingControl);
 }
 
 function ValidateCars() {
@@ -239,11 +250,11 @@ document.addEventListener("DOMContentLoaded", initializeApplication)
 
 function sendFile() {
     var path = document.getElementById("file").value
-    var script = document.createElement("script");
-    script.src = path;
-    $("head").append(script);
-    // var data = $.getJSON(path, function(obj) {});
-    console.log(newValues);
+        // var script = document.createElement("script");
+        // script.src = path;
+        // $("head").append(script);
+    var data = $.getJSON(path, function(obj) {});
+    console.log(data);
 }
 
 function mapCurrentVehicleRoutesToPoints(currentVehicleRoutes) {
@@ -265,3 +276,42 @@ function drawPathsBasedOnVehicleRoutes(vehicleRoutes) {
         }
     }
 }
+
+function loadFile() {
+    var input, file, fr;
+
+    if (typeof window.FileReader !== 'function') {
+        alert("The file API isn't supported on this browser yet.");
+        return;
+    }
+
+    input = document.getElementById('fileinput');
+    if (!input) {
+        alert("Um, couldn't find the fileinput element.");
+    } else if (!input.files) {
+        alert("This browser doesn't seem to support the `files` property of file inputs.");
+    } else if (!input.files[0]) {
+        alert("Please select a file before clicking 'Load'");
+    } else {
+        file = input.files[0];
+        fr = new FileReader();
+        fr.onload = receivedText;
+        fr.readAsText(file);
+    }
+
+    function receivedText(e) {
+        let lines = e.target.result;
+        var newArr = JSON.parse(lines);
+        newArr.forEach(point => {
+            var weight = point.weight
+            var latitude = point.latitude
+            var longitude = point.longitude
+            var uniqueIdentifier = Math.random().toString(36).slice(2);
+
+            visibleDeliveryPackages[uniqueIdentifier] = new DeliveryPackage(weight, latitude, longitude, uniqueIdentifier);
+        });
+        initializeApplication();
+    }
+}
+
+setInterval(initializeApplication, 5000);
