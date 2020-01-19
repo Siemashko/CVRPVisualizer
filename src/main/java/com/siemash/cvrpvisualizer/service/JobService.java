@@ -1,6 +1,6 @@
 package com.siemash.cvrpvisualizer.service;
 
-import com.siemash.cvrpvisualizer.controller.dto.CreateNewVisualizationRequestVo;
+import com.siemash.cvrpvisualizer.controller.dto.CreateNewVisualizationRequestCommand;
 import com.siemash.cvrpvisualizer.exception.NotFoundException;
 import com.siemash.cvrpvisualizer.model.Job;
 import com.siemash.cvrpvisualizer.model.Job.*;
@@ -21,7 +21,7 @@ public class JobService {
     private final JobRepository jobRepository;
     private final PointRepository pointRepository;
 
-    public Job createNewVisualization(CreateNewVisualizationRequestVo request) {
+    public Job createNewVisualization(CreateNewVisualizationRequestCommand request) {
 
         final Point depot = Point.fromDto(request.getDepot());
 

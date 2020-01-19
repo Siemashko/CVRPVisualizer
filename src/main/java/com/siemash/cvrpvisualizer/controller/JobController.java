@@ -1,6 +1,6 @@
 package com.siemash.cvrpvisualizer.controller;
 
-import com.siemash.cvrpvisualizer.controller.dto.CreateNewVisualizationRequestVo;
+import com.siemash.cvrpvisualizer.controller.dto.CreateNewVisualizationRequestCommand;
 import com.siemash.cvrpvisualizer.controller.dto.JobDto;
 import com.siemash.cvrpvisualizer.exception.NotFoundException;
 import com.siemash.cvrpvisualizer.service.JobService;
@@ -28,7 +28,7 @@ public class JobController {
     }
 
     @PostMapping
-    public JobDto createNewVisualization(@RequestBody CreateNewVisualizationRequestVo request){
+    public JobDto createNewVisualization(@RequestBody CreateNewVisualizationRequestCommand request){
         return JobDto.from(jobService.createNewVisualization(request));
     }
 

@@ -57,4 +57,25 @@ public abstract class Solver {
     public boolean isSolved() {
         return !this.isPointAssignedMap.containsValue(false);
     }
+
+    public Double getSolutionCost() {
+        return Solver.calculateSolutionCost(distanceMatrix, vehicleRoutes);
+    }
+
+    protected static Double calculateSolutionCost(DistanceMatrix distanceMatrix, List<List<Point>> vehicleRoutes) {
+        return vehicleRoutes.stream().map(route -> {
+            double accumulator = 0.0;
+            for (int i = 0; i < route.size() - 1; i++) {
+                accumulator += distanceMatrix.get(route.get(i),route.get(i+1));
+            }
+            return accumulator;
+        }).mapToDouble(Double::doubleValue).sum();
+    }
+
+
+    @Override
+    public String toString() {
+        return "{\"currentVehicleRoutes\":" + this.vehicleRoutes + "," +
+                "\"totalDistance\":" + this.getSolutionCost() + "}";
+    }
 }

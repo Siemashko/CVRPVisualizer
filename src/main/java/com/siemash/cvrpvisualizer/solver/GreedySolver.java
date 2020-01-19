@@ -35,11 +35,9 @@ public class GreedySolver extends Solver {
                     .collect(Collectors.toList());
 
             if (possiblePointsForCurrentVehicle.isEmpty()) {
-                super.vehicleRoutes.get(this.currentVehicleIndex).add(startingPoint);
                 this.currentVehicleIndex++;
                 if (currentVehicleIndex >= super.numberOfVehicles) {
-                    throw new UnsolvableJobException(
-                            "Cannot solve the CVRP with greedy algorithm for the given set of parameters");
+                    throw new UnsolvableJobException("Cannot solve the CVRP with greedy algorithm for the given set of parameters");
                 }
                 return this;
             }
@@ -53,6 +51,13 @@ public class GreedySolver extends Solver {
             super.currentVehiclePosition.set(this.currentVehicleIndex, closestPoint);
             super.isPointAssignedMap.put(closestPoint, true);
 
+            if(super.isSolved()) {
+                super.currentVehiclePosition.set(this.currentVehicleIndex, startingPoint);
+                for(List<Point> vehicleRoutes : super.vehicleRoutes) {
+                    vehicleRoutes.add(startingPoint);
+                }
+            }
+
             return this;
         } else {
             return this;
@@ -61,11 +66,6 @@ public class GreedySolver extends Solver {
 
     @Override
     public String toString() {
-        return "{\"currentVehicleIndex\":" + this.currentVehicleIndex + "," +
-                "\"currentVehicleRoutes\":" + super.vehicleRoutes + "," +
-                "\"currentVehicleLoads\":" + super.vehicleLoads + "," +
-                "\"pointsLeft\":" + super.isPointAssignedMap.values().stream().filter(value -> !value).count() + "}";
+        return super.toString();
     }
-
-
 }

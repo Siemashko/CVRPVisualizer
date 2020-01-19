@@ -7,7 +7,7 @@ import java.util.List;
 
 @Value
 @AllArgsConstructor
-public class CreateNewVisualizationRequestVo {
+public class CreateNewVisualizationRequestCommand {
     private String algorithm;
     private List<Double> vehicleCapacities;
     private List<PointDto> points;

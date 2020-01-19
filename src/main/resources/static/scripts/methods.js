@@ -19,17 +19,12 @@ async function initializeApplication() {
     pathLayerGroup.clearLayers();
 
     document.getElementById("package-list").innerHTML = "";
-    document.getElementById("job-list").innerHTML = "";
     // var listOfDeliveryPackages = await findAll();
     // listOfDeliveryPackages.forEach(package => addPackageToList(package));
     Object.keys(visibleDeliveryPackages).forEach(packageIdentifier => addPackageToList(visibleDeliveryPackages[packageIdentifier]));
-    var jobList = await findAllJobs();
-    visibleJobs = jobList.reduce(function(map, obj) {
-        map[obj.id] = obj;
-        return map;
-    }, {});
-    Object.keys(visibleJobs).forEach(jobId => addJobToList(visibleJobs[jobId]));
+    refreshJobs();
     if (activeJob && activeJob.jobStatus === "DONE") {
+        document.getElementById("distance").innerHTML = "Current distance: " + JSON.parse(activeJob.jobResult)[currentFrame].totalDistance;
         drawPathsBasedOnVehicleRoutes(mapCurrentVehicleRoutesToPoints(JSON.parse(activeJob.jobResult)[currentFrame].currentVehicleRoutes));
     }
     var greenIcon = new L.Icon({
@@ -40,8 +35,18 @@ async function initializeApplication() {
         popupAnchor: [1, -34],
         shadowSize: [82 * 0.707, 82 * 0.707]
     });
-    L.marker([52.2, 21], { icon: greenIcon }).addTo(markerLayerGroup);
+    L.marker([52.2297, 21.0122], { icon: greenIcon }).addTo(markerLayerGroup);
 
+}
+
+async function refreshJobs() {
+    var jobList = await findAllJobs();
+    visibleJobs = jobList.reduce(function(map, obj) {
+        map[obj.id] = obj;
+        return map;
+    }, {});
+    document.getElementById("job-list").innerHTML = "";
+    Object.keys(visibleJobs).forEach(jobId => addJobToList(visibleJobs[jobId]));
 }
 
 
@@ -137,7 +142,7 @@ function drawPath(lat1, lng1, lat2, lng2, color) {
         lineOptions: {
             styles: [{
                 color: color,
-                opacity: 1,
+                opacity: 0.75,
                 weight: 5
             }]
         }
@@ -162,7 +167,7 @@ function showVehicleModal() {
 }
 
 function showModalFromPackage(e) {
-    packageId = Number(e.target.id.replace("package-", ""));
+    packageId = e.target.id.replace("package-", "");
     activeModaleDeliveryPackageId = packageId;
     var deliveryPackage = visibleDeliveryPackages[packageId];
 
@@ -180,7 +185,7 @@ function showModalFromPackage(e) {
 
 function showModalFromMarker(e) {
     console.log(e.target.id);
-    packageId = Number(e.target.id.replace("marker-", ""));
+    packageId = e.target.id.replace("marker-", "");
     activeModaleDeliveryPackageId = packageId;
     var deliveryPackage = visibleDeliveryPackages[packageId];
 
@@ -202,8 +207,13 @@ async function sendCreateJobRequest(e) {
     }
     var vehicleCapacities = Array.from({ length: Number(document.getElementById("cars").value) }, (v, k) => 10);
     var points = Object.values(visibleDeliveryPackages);
-    var depot = new DeliveryPackage(0, 52.2, 21, "depot");
-    var algorithm = document.getElementsByName("algorithm")[0].value;
+    var depot = new DeliveryPackage(0, 52.2297, 21.0122, "depot");
+    var algorithm;
+    if (document.getElementsByName("algorithm")[0].checked) {
+        algorithm = document.getElementsByName("algorithm")[0].value;
+    } else {
+        algorithm = document.getElementsByName("algorithm")[1].value;
+    }
     var createJobRequest = new CreateJobRequest(points, algorithm, depot, vehicleCapacities);
     response = await createJob(createJobRequest);
     console.log(response);
@@ -260,7 +270,7 @@ function sendFile() {
 function mapCurrentVehicleRoutesToPoints(currentVehicleRoutes) {
     return currentVehicleRoutes.map(currentVehicleRoute => currentVehicleRoute.map(ui => {
         if (ui === "depot") {
-            return new DeliveryPackage(0, 52.2, 21, "depot");
+            return new DeliveryPackage(0, 52.2297, 21.0122, "depot");
         } else {
             return visibleDeliveryPackages[ui];
         }
@@ -268,6 +278,8 @@ function mapCurrentVehicleRoutesToPoints(currentVehicleRoutes) {
 }
 
 function drawPathsBasedOnVehicleRoutes(vehicleRoutes) {
+    routingControls.forEach(routingControl => mymap.removeControl(routingControl));
+    routingControls = [];
     for (var k = 0; k < vehicleRoutes.length; k++) {
         var vehicleRoute = vehicleRoutes[k];
         var color = colormap[k % 11];
@@ -314,4 +326,4 @@ function loadFile() {
     }
 }
 
-setInterval(initializeApplication, 5000);
+setInterval(refreshJobs, 5000);
