@@ -130,7 +130,7 @@ function drawPath(lat1, lng1, lat2, lng2, color) {
             L.latLng(lat1, lng1),
             L.latLng(lat2, lng2)
         ],
-        router: L.Routing.graphHopper('cb77ede8-3517-4c8c-a7a7-c40124f4009b'),
+        router: L.Routing.graphHopper('4361cd69-bc97-45e5-bc92-9b1e76093511'),
         createMarker: function(i, waypoint, n) {
             return null;
         },
