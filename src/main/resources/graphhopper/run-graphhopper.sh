@@ -1,0 +1,1 @@
+java -Xms1g -Xmx1g -Dgraphhopper.datareader.file=mazowieckie-latest.osm.pbf -Dgraphhopper.graph.location=graph-cache -Dgraphhopper.graph.flag_encoders=car -jar graphhopper-web-0.11.0.jar server config-example.yml

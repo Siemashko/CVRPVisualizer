@@ -24,7 +24,7 @@ async function initializeApplication() {
     Object.keys(visibleDeliveryPackages).forEach(packageIdentifier => addPackageToList(visibleDeliveryPackages[packageIdentifier]));
     refreshJobs();
     if (activeJob && activeJob.jobStatus === "DONE") {
-        document.getElementById("distance").innerHTML = "Current distance: " + JSON.parse(activeJob.jobResult)[currentFrame].totalDistance;
+        document.getElementById("distance").innerHTML = "Current distance: " + Math.round(JSON.parse(activeJob.jobResult)[currentFrame].totalDistance) + " m";
         drawPathsBasedOnVehicleRoutes(mapCurrentVehicleRoutesToPoints(JSON.parse(activeJob.jobResult)[currentFrame].currentVehicleRoutes));
     }
     var greenIcon = new L.Icon({
@@ -66,7 +66,7 @@ function addPackageToList(package) {
     var packageList = document.getElementById("package-list");
     var listElement = document.createElement("li");
     listElement.id = "package-" + package.uniqueIdentifier;
-    listElement.innerHTML = "lat: " + package.latitude + " lng: " + package.longitude + " weight: " + package.weight;
+    listElement.innerHTML = "lat: " + package.latitude + " lng: " + package.longitude + " weight: " + package.weight + " kg";
     listElement.addEventListener("click", showModalFromPackage);
     packageList.append(listElement);
     var marker = L.marker([package.latitude, package.longitude]).addTo(markerLayerGroup);
